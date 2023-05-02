@@ -6,11 +6,11 @@ compt_coins <- function(x) {
   for (i in (2:(length(x) - 1))) {
     if (x[i - 1] == x[i + 1]) {
       if (x[i + 1] == (x[i] + 1)) {
+        cpt_d <- cpt_d + 1
       }
-      cpt_d <- cpt_d + 1
-    }
-    else{
-      cpt_u <- cpt_u + 1
+      else{
+        cpt_u <- cpt_u + 1
+      }
     }
   }
   return(list(cpt_u = cpt_u, cpt_d = cpt_d))

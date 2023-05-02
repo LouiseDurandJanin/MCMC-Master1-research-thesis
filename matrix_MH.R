@@ -1,4 +1,5 @@
 # --- Fonction qui renvoie une matrice des r premiere iterations de MH sur M ponts ---
+# -- Ligne i de matrice output : r etats du ieme pont stockes sous forme de cles binaires --
 source("transfo_bin.R")
 source("mh_sampler.R")
 

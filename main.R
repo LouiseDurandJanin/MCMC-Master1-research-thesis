@@ -1,7 +1,6 @@
 rm(list = ls())
-source("gen_biais.R")
+source("matrix_gen_biais.R")
 source("matrix_rejet.R")
-source("gen_pont_rejet.R")
 source("proba_accept_rejet.R")
 source("mu.R")
 source("transfo_bin.R")
@@ -15,8 +14,20 @@ source("mh_sampler.R")
 source("matrix_MH.R")
 source("T_global.R")
 source("compt_coins.R")
+source("coupl_step.R")
+source("couplage.R")
+source("matrix_couplage.R")
+source("vect_estim_K.R")
+source("couplage_passe.R")
 library(dplyr)
 library(ggplot2)
+library(rbenchmark)
+
+# --- Graphe temps d'execution du tirage sans remise en fonction N ---
+
+benchmark(sample(diff(enveloppe(6,TRUE))))
+
+
 # --- Graphe de la probabilite d'acceptation du rejet en fonction de N --- #
 
 
@@ -71,19 +82,17 @@ ggsave(filename = "hist_biais.png",
 
 # --- P-valeur du test d'uniformité applique au generateur biaise ---
 mu <- mu(6)
-pvalue_biais <- chisq.test(table(v_biais), p = mu)$p.value
-
+options(digits=10)
+pvalue_biais <- chisq.test(table(v_biais), p = mu)
+print(pvalue_biais, digits=10)
 # --- Histogrammes de la recurrence aleatoire ---
 
-mat_rec_200 <-
-  matrix_rec_mult(10000, 6, 200, 1 / 2, enveloppe(6, TRUE))
+mat_rec_200 <- matrix_rec_mult(10000, 6, 200, 1 / 2, enveloppe(6, TRUE))
 
 # --- Histogramme apres 50 iterations ---
 
-freq_rec_50 <-
-  table(mat_rec_200[, 51]) #--On va jusqu'à 51 car la premiere cle stockee est l'initialisation
-freq_df_50 <-
-  data.frame(valeur = names(freq_rec_50),
+freq_rec_50 <- table(mat_rec_200[, 51]) #--On va jusqu'à 51 car la premiere cle stockee est l'initialisation
+freq_df_50 <- data.frame(valeur = names(freq_rec_50),
              frequence = as.numeric(freq_rec_50))
 ggplot (freq_df_50, aes(x = valeur, y = frequence)) +
   scale_x_discrete(limits = names(freq_rec_50)) +
@@ -183,36 +192,73 @@ ggsave(filename = "plot_pvalue.png",
        path = "~/Desktop/Mémoire")
 
 # --- Graphe d'autocorrelation pour les 200 premieres iterations de la recurrence avec p=1/2 ---
-vec_1000 <- transfo_bin(rec_mult(1000, enveloppe(6, TRUE), 6, 1 / 2))
-#df_acf <- data.frame( x=seq(0, 500), y=vec_500)
-#ggplot(df_acf, aes(x, y)) +
-geom_col(fill = "red") +
-  xlab ("Nombre d'itérations de la récurrence aléatoire") +
-  ylab("P-valeur") +
-  theme(axis.title.x = element_text(size = 18),
-        axis.text.x = element_text(face = "bold",
-                                   size =
-                                     14)) +
-  theme(axis.title.y = element_text(size = 18),
-        axis.text.y = element_text(face = "bold",
-                                   size =
-                                     14)) +
-  theme_light()
+vec_rec_1000 <- transfo_bin(rec_mult(1000, enveloppe(6, TRUE), 6, 1 / 2))
 plot(
-  acf(vec_1000, plot = FALSE, lag.max = 1000),
-  main = " p = 1/2",
-  xlab = "Itérations de la récurrence",
-  ylab = "Corrélation entre deux itérations successives"
+  acf(vec_rec_1000, plot = FALSE, lag.max = 500),
+  main = " ",
+  xlab = "Lag",
+  ylab = "Autocorrélation pour un lag donné",
+  col='red'
 )
 
 # --- Graphe d'autocorrelation pour les 200 premieres iterations de MH avec p=1/6---
-vec_MH_1000 <-
-  acf(transfo_bin(mh_sampler(enveloppe(6, TRUE), 1000, 1 / 6, 6)),
-      plot = FALSE,
-      lag.max = 1000)
-#df_acf_MH <- data.frame( x=seq(0, 500), y=vec_500)
+vec_MH_1000 <-transfo_bin(mh_sampler(enveloppe(6, TRUE), 1000, 1 / 6, 6))
 
-plot(vec_MH_1000,
-     main = "p=1/6",
-     xlab = "Itérations de la récurrence",
-     ylab = "Corrélation entre deux itérations successives")
+plot(
+  acf(vec_MH_1000, plot = FALSE, lag.max = 500),
+  main = " ",
+  xlab = "Lag",
+  ylab = "Autocorrélation pour un lag donné",
+  col='red'
+)
+
+
+# --- Histogramme de la methode de couplage ---
+mat_couplage <- transfo_bin( matrix_couplage(10000, 6, 1/2))
+freq_coupl <- table(mat_couplage)
+freq_df_coupl<- data.frame(valeur = names(freq_coupl), frequence = as.numeric(freq_coupl))
+
+ggplot (freq_df_coupl, aes(x = valeur, y = frequence)) +
+  geom_col(fill="#3399FF" ) +
+  scale_x_discrete(limits = names(freq_coupl)) +
+  xlab ("Clés binaires") +
+  ylab("Effectifs")+ 
+  theme(axis.title.x = element_text(size=18),axis.text.x = element_text(face="bold",  
+                                                                        size=14))+
+  theme(axis.title.y = element_text(size=18), axis.text.y = element_text(face="bold",  
+                                                                         size=14))+
+  theme_light()
+
+ggsave(filename = "hist_coupl.png",
+       scale = .6,
+       path = "~/Desktop/Mémoire")
+
+# --- P-valeur couplage ---
+
+mu <- mu(6)
+pvalue_coupl <- chisq.test(freq_coupl, p = mu, rescale.p = TRUE)
+print(pvalue_coupl, digits=10)
+
+# --- Graphe estimation du temps de couplage K en fonction de N ---
+
+
+
+x<-seq(4,20, by=2)
+v <- vect_estim_K(20, 500)
+df <- data.frame(x=seq(4,20, by=2), v=v)
+
+ggplot(df, aes(x, v)) +
+  geom_line(color="red")+
+  geom_point(color="red")+
+  xlab ("longueur de la chaine N") +
+  ylab("Estimation de K ")+ 
+  theme(axis.title.x = element_text(size=18),axis.text.x = element_text(face="bold",  
+                                                                        size=14))+
+  theme(axis.title.y = element_text(size=18), axis.text.y = element_text(face="bold",  
+                                                                         size=14))+
+  theme_light()
+
+
+
+
+
