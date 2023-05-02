@@ -23,18 +23,14 @@ library(dplyr)
 library(ggplot2)
 library(rbenchmark)
 
-# --- Graphe temps d'execution du tirage sans remise en fonction N ---
-
-benchmark(sample(diff(enveloppe(6,TRUE))))
-
 
 # --- Graphe de la probabilite d'acceptation du rejet en fonction de N --- #
 
 
 
-df <- data.frame(x = seq(2, 100, 2))
-df <- df %>% mutate(y = proba_accept_rejet(x))
-ggplot(df, aes(x, y)) +
+df_rejet <- data.frame(x = seq(2, 100, 2))
+df_rejet <- df_rejet %>% mutate(y = proba_accept_rejet(x))
+ggplot(df_rejet, aes(x, y)) +
   geom_line(color = "red") +
   geom_point(color = "red") +
   xlab ("N") +
@@ -48,6 +44,7 @@ ggplot(df, aes(x, y)) +
                                    size =
                                      14)) +
   theme_light()
+
 ggsave(filename = "plot_proba_accept.png",
        scale = .6,
        path = "~/Desktop/Mémoire")
@@ -243,11 +240,11 @@ print(pvalue_coupl, digits=10)
 
 
 
-x<-seq(4,20, by=2)
-v <- vect_estim_K(20, 500)
-df <- data.frame(x=seq(4,20, by=2), v=v)
+x_K<-seq(4,20, by=2)
+vec_K <- vect_estim_K(20, 500)
+df_K <- data.frame(x = x_K, v = vect_K)
 
-ggplot(df, aes(x, v)) +
+ggplot(df_K, aes(x, v)) +
   geom_line(color="red")+
   geom_point(color="red")+
   xlab ("longueur de la chaine N") +
@@ -257,6 +254,12 @@ ggplot(df, aes(x, v)) +
   theme(axis.title.y = element_text(size=18), axis.text.y = element_text(face="bold",  
                                                                          size=14))+
   theme_light()
+
+ggsave(filename = "plot_K.png",
+       scale = .6,
+       path = "~/Desktop/Mémoire")
+
+
 
 
 

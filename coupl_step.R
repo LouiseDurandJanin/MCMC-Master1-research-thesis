@@ -1,5 +1,4 @@
 # --- Fonction qui effectue une iteration de couplage ---
-source("T_global.R")
 
 coupl_step <- function(x, y, p = .5, N) {
   u <- sample(2:N, 1)

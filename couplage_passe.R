@@ -27,27 +27,28 @@ coupl_mult <- function(x,y,K,p,N){
 # --- Fonction qui effectue la methode de couplage dans le passe ---
 # --- Elle effectue K iterations de couplage, si les chaines n'ont pas coalesce, on recommence avec K + lag iterations
 
-couplage_passe <- function(x,y,p,N, M, lag=100){
+couplage_passe <- function(x, y, p, N, M, lag=50){
   K<- round(estim_K(x, y, p, N, M)$estim) # Estimation de K sur M ponts en fonction N 
-  test <- coupl_mult(x,y,K,p,N)
+  test <- coupl_mult(x, y, K, p, N)
   while (!test$res){
     K = K + lag
-    test <- coupl_mult(x,y,K,p,N)
+    test <- coupl_mult(x, y, K, p, N)
   }
   return(list(x = test$x, it = test$it, K = K))
 }
 
-couplage_passe(enveloppe(6,TRUE), enveloppe(6, FALSE), 1/2, 6, 200)
+
+
 
 #Matrice de M pont resultant d'un couplage from the past
 matrix_couplage_passe <- function(x0, y0, M, p, N) {
   ans <- matrix(0, M, N)
-  attente <- numeric(M)
+  K <- numeric(M)
   for (i in seq_len(M)) {
-    k <- couplage_passe(x0,y0,p,N,M)
-    attente[i] <- k$K - k$it
+    k <- couplage_passe(x0, y0, p, N, M)
+    K[i] <- k$K 
     ans[i,] <-diff(k$x)
   }
-  return(list( ans = ans, attente = attente)) # attente correspond au temps de melange apres coalescence
+  return(list( ans = ans, K = K))
 }
-matrix_couplage_passe(enveloppe(6,TRUE), enveloppe(6, FALSE), 200, 1/2, 6)
+
