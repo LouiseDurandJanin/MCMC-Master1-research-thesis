@@ -187,6 +187,30 @@ ggplot(df_pvaleur, aes(x, v)) +
 ggsave(filename = "plot_pvalue.png",
        scale = .5,
        path = "~/Desktop/Mémoire")
+       
+  # --- Graphe d'evolution de la pvaleur en fonction du nombre d'iterations de MH ---
+
+vec_pvaleur2 <- vect_pvalue_MH(1000, 6, 200, 1 / 6, enveloppe(6, TRUE))
+df_pvaleur2 <- data.frame(x = seq(10, 200, by = 10), v = vec_pvaleur2)
+
+ggplot(df_pvaleur2, aes(x, v)) +
+  geom_line(color = "red") +
+  geom_point(color = "red") +
+  xlab ("Nombre d'itérations de la récurrence aléatoire") +
+  ylab("P-valeur") +
+  theme(axis.title.x = element_text(size = 18),
+        axis.text.x = element_text(face = "bold",
+                                   size =
+                                     14)) +
+  theme(axis.title.y = element_text(size = 18),
+        axis.text.y = element_text(face = "bold",
+                                   size =
+                                     14)) +
+  theme_light()
+ggsave(filename = "plot_pvalue2.png",
+       scale = .5,
+       path = "~/Desktop/Mémoire")
+
 
 # --- Graphe d'autocorrelation pour les 200 premieres iterations de la recurrence avec p=1/2 ---
 vec_rec_1000 <- transfo_bin(rec_mult(1000, enveloppe(6, TRUE), 6, 1 / 2))
