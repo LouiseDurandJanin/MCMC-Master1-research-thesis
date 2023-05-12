@@ -254,6 +254,26 @@ ggsave(filename = "hist_coupl.png",
        scale = .6,
        path = "~/Desktop/Mémoire")
 
+# --- Histogramme de la methode de couplage past ---
+mat_couplage_past <- transfo_bin( matrix_couplage_passe(enveloppe(6,TRUE),enveloppe(6,FALSE),100, 1/6, 6))
+freq_coupl <- table(mat_couplage_past)
+freq_df_coupl<- data.frame(valeur = names(freq_coupl), frequence = as.numeric(freq_coupl))
+
+ggplot (freq_df_coupl, aes(x = valeur, y = frequence)) +
+  geom_col(fill="#3399FF" ) +
+  scale_x_discrete(limits = names(freq_coupl)) +
+  xlab ("Clés binaires") +
+  ylab("Effectifs")+ 
+  theme(axis.title.x = element_text(size=18),axis.text.x = element_text(face="bold",  
+                                                                        size=14))+
+  theme(axis.title.y = element_text(size=18), axis.text.y = element_text(face="bold",  
+                                                                         size=14))+
+  theme_light()
+
+ggsave(filename = "hist_coupl_past.png",
+       scale = .6,
+       path = "~/Desktop/Mémoire")
+
 # --- P-valeur couplage ---
 
 mu <- mu(6)
