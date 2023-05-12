@@ -3,7 +3,7 @@
 source("mu.R")
 source("matrix_MH.R")
 
-vect_pvalue <- function(M, N, r, p, x0, lag = 10) {
+vect_pvalue_MH <- function(M, N, r, p, x0, lag = 10) {
   rangs <- seq(10, r, by = lag)
   mat <- matrix_MH(M, N, r, x0, p)
   res <- rep(0, length(rangs))

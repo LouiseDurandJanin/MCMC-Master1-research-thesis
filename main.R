@@ -19,6 +19,7 @@ source("couplage.R")
 source("matrix_couplage.R")
 source("vect_estim_K.R")
 source("couplage_passe.R")
+source("vect_pvalue_MH.R")
 library(dplyr)
 library(ggplot2)
 library(rbenchmark)
@@ -190,13 +191,14 @@ ggsave(filename = "plot_pvalue.png",
        
   # --- Graphe d'evolution de la pvaleur en fonction du nombre d'iterations de MH ---
 
-vec_pvaleur2 <- vect_pvalue_MH(1000, 6, 200, 1 / 6, enveloppe(6, TRUE))
-df_pvaleur2 <- data.frame(x = seq(10, 200, by = 10), v = vec_pvaleur2)
+
+vec_pvaleur2 <- vect_pvalue_MH(500, 6, 500, 1 / 6, enveloppe(6, TRUE), 50)
+df_pvaleur2 <- data.frame(x = seq(50, 1000, by = 50), v = vec_pvaleur2)
 
 ggplot(df_pvaleur2, aes(x, v)) +
   geom_line(color = "red") +
   geom_point(color = "red") +
-  xlab ("Nombre d'itérations de la récurrence aléatoire") +
+  xlab ("Nombre d'itérations de MH") +
   ylab("P-valeur") +
   theme(axis.title.x = element_text(size = 18),
         axis.text.x = element_text(face = "bold",
@@ -205,8 +207,7 @@ ggplot(df_pvaleur2, aes(x, v)) +
   theme(axis.title.y = element_text(size = 18),
         axis.text.y = element_text(face = "bold",
                                    size =
-                                     14)) +
-  theme_light()
+                                     14))
 ggsave(filename = "plot_pvalue2.png",
        scale = .5,
        path = "~/Desktop/Mémoire")
@@ -288,21 +289,21 @@ ggsave(filename = "plot_K.png",
 # --- Graphe de l'estimation de K avec proba accept ---
 
 x_K<-seq(4,20, by=2)
-y <- proba_accept_rejet(x_K)
+y <- 1/proba_accept_rejet(x_K)
 vec_K <- vect_estim_K(20, 500)
 df_K <- data.frame(x = x_K, y= y, v = vec_K)
 
 ggplot(df_K, aes(x)) +
-  geom_line(aes(y=v),color="red")+
-  geom_point(aes(y=v,color="Estimation de K"))+
+  geom_line(aes(y=v,color="Estimation de K"))+
+  geom_point(aes(y=v),color="red")+
   geom_line(aes(y=y), color="blue")+
-  geom_point(aes(y=y, color="Probabilité d'acceptation du rejet"))+
+  geom_point(aes(y=y, color="Estimation du temps
+d'acceptation du rejet"))+
   scale_color_manual(values = c("red", "blue"))+
   xlab ("longueur de la chaine N") +
   ylab("")+
   theme(axis.title.x = element_text(size=18),axis.text.x = element_text(face="bold",  
                                                                         size=14))+
   theme(axis.title.y = element_text(size=18), axis.text.y = element_text(face="bold",  
-                                                                         size=14))+
-  theme_light()
+                                                                         size=14))
 
