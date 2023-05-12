@@ -285,7 +285,24 @@ ggsave(filename = "plot_K.png",
 
 
 
+# --- Graphe de l'estimation de K avec proba accept ---
 
+x_K<-seq(4,20, by=2)
+y <- proba_accept_rejet(x_K)
+vec_K <- vect_estim_K(20, 500)
+df_K <- data.frame(x = x_K, y= y, v = vec_K)
 
-
+ggplot(df_K, aes(x)) +
+  geom_line(aes(y=v),color="red")+
+  geom_point(aes(y=v,color="Estimation de K"))+
+  geom_line(aes(y=y), color="blue")+
+  geom_point(aes(y=y, color="Probabilité d'acceptation du rejet"))+
+  scale_color_manual(values = c("red", "blue"))+
+  xlab ("longueur de la chaine N") +
+  ylab("")+
+  theme(axis.title.x = element_text(size=18),axis.text.x = element_text(face="bold",  
+                                                                        size=14))+
+  theme(axis.title.y = element_text(size=18), axis.text.y = element_text(face="bold",  
+                                                                         size=14))+
+  theme_light()
 
