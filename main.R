@@ -256,7 +256,7 @@ ggsave(filename = "hist_coupl.png",
        path = "~/Desktop/Mémoire")
 
 # --- Histogramme de la methode de couplage past ---
-mat_couplage_past <- transfo_bin( matrix_couplage_passe(enveloppe(6,TRUE),enveloppe(6,FALSE),100, 1/6, 6))
+mat_couplage_past <- transfo_bin( matrix_couplage_passe(enveloppe(6,TRUE),enveloppe(6,FALSE),200, 1/2, 6)$ans)
 freq_coupl <- table(mat_couplage_past)
 freq_df_coupl<- data.frame(valeur = names(freq_coupl), frequence = as.numeric(freq_coupl))
 

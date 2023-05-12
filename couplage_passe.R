@@ -1,5 +1,5 @@
 # ---- Couplage dans le passe ----
-
+source("vect_estim.R")
 
 # -- Fonction effectuant K itérations de couplage 
 # --- Elle renvoie :
@@ -27,28 +27,30 @@ coupl_mult <- function(x,y,K,p,N){
 # --- Fonction qui effectue la methode de couplage dans le passe ---
 # --- Elle effectue K iterations de couplage, si les chaines n'ont pas coalesce, on recommence avec K + lag iterations
 
-couplage_passe <- function(x, y, p, N, M, lag=50){
-  K<- round(estim_K(x, y, p, N, M)$estim) # Estimation de K sur M ponts en fonction N 
-  test <- coupl_mult(x, y, K, p, N)
+couplage_passe <- function(x, y, p, N, M, K_estim, lag=100){ 
+  test <- coupl_mult(x, y, K_estim, p, N)
   while (!test$res){
-    K = K + lag
-    test <- coupl_mult(x, y, K, p, N)
+    K_estim = K_estim + lag
+    test <- coupl_mult(x, y, K_estim, p, N)
   }
-  return(list(x = test$x, it = test$it, K = K))
+  return(list(x = test$x, it = test$it, K = K_estim))
 }
 
-
+couplage_passe(enveloppe(6, TRUE), enveloppe(6, FALSE), 1/2, 6, 100, 100)
 
 
 #Matrice de M pont resultant d'un couplage from the past
 matrix_couplage_passe <- function(x0, y0, M, p, N) {
   ans <- matrix(0, M, N)
+  K_estim <- estim_K(x0, y0, p, N, 100)$estim
   K <- numeric(M)
   for (i in seq_len(M)) {
-    k <- couplage_passe(x0, y0, p, N, M)
+    k <- couplage_passe(x0, y0, p, N, M, K_estim)
     K[i] <- k$K 
     ans[i,] <-diff(k$x)
   }
   return(list( ans = ans, K = K))
 }
 
+
+matrix_couplage_passe(enveloppe(6, TRUE), enveloppe(6, FALSE), 100, 1/2, 6)
